@@ -1,42 +1,47 @@
 # ===========================================================
-# predict_sample.py — Jenkins Auto Prediction Script
+# predict_sample.py - Jenkins Safe ASCII Version
 # ===========================================================
 
 import joblib
 import numpy as np
-import pandas as pd
 import os
+import pandas as pd
 
 MODEL_PATH = "model.pkl"
 
-print("\n🔍 Checking model file...")
+print("\n--- Checking model file ---")
 if not os.path.exists(MODEL_PATH):
-    print("❌ model.pkl not found. Please train the model first.")
+    print("ERROR: Model not found. Please train the model first.")
     exit(1)
 
-# Load trained model
+# Load the trained model
+print("Model found. Loading model...")
 model = joblib.load(MODEL_PATH)
-print("✅ Model loaded successfully!\n")
+print("Model loaded successfully.\n")
 
-# Define multiple test cases
-# Columns assumed: [overs, wickets, runs_so_far, venue_factor]
-test_cases = pd.DataFrame([
-    [5.0, 1, 42, 1.0],
+# Sample test inputs
+# Columns order: [overs, wickets, runs_so_far, venue_factor]
+test_cases = [
+    [5.0, 1, 42, 1.00],
     [10.0, 2, 85, 1.05],
     [15.0, 3, 120, 0.95],
-    [18.0, 4, 150, 1.1],
-    [19.0, 6, 170, 0.9]
-], columns=["overs", "wickets", "runs_so_far", "venue_factor"])
+    [18.0, 4, 150, 1.10],
+    [19.0, 6, 170, 0.90],
+]
 
-# Predict for all rows
-predictions = model.predict(test_cases.values)
+print("Running sample IPL score predictions...")
+inputs = np.array(test_cases)
 
-# Combine results into a table
-test_cases["Predicted_Score"] = predictions.round(2)
+# Predict using the trained model
+preds = model.predict(inputs)
 
-print("🏏 IPL Score Predictions (from Jenkins):")
-print(test_cases.to_string(index=False))
+# Combine input and output into table
+results = pd.DataFrame(test_cases, columns=["overs", "wickets", "runs_so_far", "venue_factor"])
+results["Predicted_Score"] = preds.round(2)
 
-# Optionally save to CSV for artifact tracking
-test_cases.to_csv("predicted_scores.csv", index=False)
-print("\n✅ Predictions saved to predicted_scores.csv")
+print("\n--- IPL Score Predictions (Jenkins Output) ---")
+print(results.to_string(index=False))
+
+# Save to CSV for artifact collection
+results.to_csv("predicted_scores.csv", index=False)
+print("\nPredictions saved to predicted_scores.csv\n")
