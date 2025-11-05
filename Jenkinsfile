@@ -8,6 +8,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 echo '🔁 Cloning source code from GitHub...'
@@ -47,7 +48,7 @@ pipeline {
 
         stage('Run Notebook') {
             steps {
-                echo '📓 Executing Jupyter notebook (with security bypass)...'
+                echo '📓 Executing Jupyter notebook (with security bypass enabled)...'
                 bat """
                 set JUPYTER_ALLOW_INSECURE_WRITES=true
                 "%PYTHON_EXE%" -m jupyter nbconvert --to notebook --execute ipl_score_predictor.ipynb --output output_notebook.ipynb --log-level=INFO
@@ -80,7 +81,7 @@ pipeline {
         }
 
         failure {
-            echo '❌ Build failed. Check console output for errors.'
+            echo '❌ Build failed. Check console output for details.'
         }
     }
 }
